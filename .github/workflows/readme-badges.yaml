@@ -1,0 +1,23 @@
+name: Update AoC Badges
+on:
+  schedule:
+    - cron: "16 6 1-25 12 *" # from the 1. December till 25. December every day at 6:16am (avoid load at full hours)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2 # clones your repo
+
+      - uses: joblo2213/aoc-badges-action@v3
+        with:
+          userid: 2284826 
+          session: ${{ secrets.AOC_SESSION }}
+          year: 2024
+
+      - uses: stefanzweifel/git-auto-commit-action@v5 
+        with:
+          commit_message: Update README badges
