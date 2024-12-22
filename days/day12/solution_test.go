@@ -24,12 +24,11 @@ func TestPart1(t *testing.T) {
 			input: exampleInput1,
 			want:  1930,
 		},
-		// FIXME
-		// {
-		// 	name:  "real",
-		// 	input: input,
-		// 	want:  42,
-		// },
+		{
+			name:  "real",
+			input: input,
+			want:  1489582,
+		},
 	}
 
 	for _, tt := range tests {
@@ -41,8 +40,16 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-// FIXME
-const exampleInput2 string = ``
+const exampleInput2 string = `RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE`
 
 func TestPart2(t *testing.T) {
 	tests := []struct {
@@ -53,8 +60,7 @@ func TestPart2(t *testing.T) {
 		{
 			name:  "example",
 			input: exampleInput2,
-			// FIXME
-			want: 42,
+			want:  1206,
 		},
 		// FIXME
 		// {
