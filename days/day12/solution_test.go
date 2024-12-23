@@ -62,12 +62,11 @@ func TestPart2(t *testing.T) {
 			input: exampleInput2,
 			want:  1206,
 		},
-		// FIXME
-		// {
-		// 	name:  "real",
-		// 	input: input,
-		// 	want:  42,
-		// },
+		{
+			name:  "real",
+			input: input,
+			want:  914966,
+		},
 	}
 
 	for _, tt := range tests {

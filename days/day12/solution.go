@@ -74,97 +74,66 @@ func part1(input string) any {
 func part2(input string) any {
 	grid := strings.Split(strings.TrimSpace(input), "\n")
 
-	addedGrid := make([][]bool, len(grid))
-	for i := range addedGrid {
-		addedGrid[i] = make([]bool, len(grid[i]))
+	visited := make([][]bool, len(grid))
+	for i := range visited {
+		visited[i] = make([]bool, len(grid[i]))
 	}
 
 	result := 0
+
 	for y := range grid {
-		for x, val := range grid[y] {
+		for x := range grid[y] {
 			pos := point{x, y}
-			if addedGrid[pos.y][pos.x] {
+			if visited[pos.y][pos.x] {
 				continue
 			}
 
-			group := []point{pos}
-			addedGrid[pos.y][pos.x] = true
+			edgeSet := make(map[point]map[point]bool)
+			calculateRegionEdges(grid, pos, edgeSet, visited)
 
-			for i := 0; i < len(group); i++ {
-				current := group[i]
-				for _, dir := range dirs {
-					nextPos := current.Add(dir)
-					if nextPos.IsInBounds(grid) && !addedGrid[nextPos.y][nextPos.x] && nextPos.OfGrid(grid) == val {
-						group = append(group, nextPos)
-						addedGrid[nextPos.y][nextPos.x] = true
-					}
+			sides := 0
+			for pos, edges := range edgeSet {
+				for edge := range edges {
+					destructivelyRemoveEdge(edgeSet, pos, edge)
+					sides++
 				}
 			}
 
-			esquinasTotales := 0
-			for _, p := range group {
-				esquinasTotales += checkCorners(grid, p)
-			}
-			result += len(group) * esquinasTotales
+			result += len(edgeSet) * sides
 		}
 	}
 
 	return result
 }
 
-func checkCorners(input []string, current point) int {
-	count := 0
-	gardenType := input[current.y][current.x]
-	x, y := current.x, current.y
+func calculateRegionEdges(grid []string, pos point, edgeSet map[point]map[point]bool, visited [][]bool) {
+	visited[pos.y][pos.x] = true
 
-	if x == 0 && y == 0 {
-		count++
-	}
-	if x == 0 && y == len(input)-1 {
-		count++
-	}
-	if x == len(input[0])-1 && y == len(input)-1 {
-		count++
-	}
-	if x == len(input[0])-1 && y == 0 {
-		count++
+	if edgeSet[pos] == nil {
+		edgeSet[pos] = make(map[point]bool)
 	}
 
-	if (x > 0 && y > 0 && input[y][x-1] != gardenType && input[y-1][x] != gardenType) ||
-		(x > 0 && y == 0 && input[y][x-1] != gardenType) || (x == 0 && y > 0 && input[y-1][x] != gardenType) {
-		count++
+	for _, dir := range dirs {
+		neighbor := pos.Add(dir)
+		if neighbor.IsInBounds(grid) {
+			if neighbor.OfGrid(grid) != pos.OfGrid(grid) {
+				edgeSet[pos][dir] = true
+			} else if !visited[neighbor.y][neighbor.x] {
+				calculateRegionEdges(grid, neighbor, edgeSet, visited)
+			}
+		} else {
+			edgeSet[pos][dir] = true
+		}
 	}
+}
 
-	if (x < len(input[0])-1 && y > 0 && input[y][x+1] != gardenType && input[y-1][x] != gardenType) ||
-		(x < len(input[0])-1 && y == 0 && input[y][x+1] != gardenType) || (x == len(input[0])-1 && y > 0 && input[y-1][x] != gardenType) {
-		count++
+func destructivelyRemoveEdge(edgeSet map[point]map[point]bool, pos point, edge point) {
+	if !edgeSet[pos][edge] {
+		return
 	}
+	delete(edgeSet[pos], edge)
 
-	if (x > 0 && y < len(input)-1 && input[y][x-1] != gardenType && input[y+1][x] != gardenType) ||
-		(x > 0 && y == len(input)-1 && input[y][x-1] != gardenType) || (x == 0 && y < len(input)-1 && input[y+1][x] != gardenType) {
-		count++
+	for _, dir := range []point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
+		destructivelyRemoveEdge(edgeSet, pos.Add(dir), edge)
 	}
-
-	if (x < len(input[0])-1 && y < len(input)-1 && input[y][x+1] != gardenType && input[y+1][x] != gardenType) ||
-		(x < len(input[0])-1 && y == len(input)-1 && input[y][x+1] != gardenType) || (x == len(input[0])-1 && y < len(input)-1 && input[y+1][x] != gardenType) {
-		count++
-	}
-
-	if x < len(input[0])-1 && y < len(input)-1 && input[y][x+1] == gardenType && input[y+1][x] == gardenType && input[y+1][x+1] != gardenType {
-		count++
-	}
-
-	if x > 0 && y < len(input)-1 && input[y][x-1] == gardenType && input[y+1][x] == gardenType && input[y+1][x-1] != gardenType {
-		count++
-	}
-
-	if x < len(input[0])-1 && y > 0 && input[y][x+1] == gardenType && input[y-1][x] == gardenType && input[y-1][x+1] != gardenType {
-		count++
-	}
-
-	if x > 0 && y > 0 && input[y][x-1] == gardenType && input[y-1][x] == gardenType && input[y-1][x-1] != gardenType {
-		count++
-	}
-
-	return count
 }
